@@ -155,3 +155,28 @@ impl<T> ChooseRandom<T> for Vec<T> {
         }
     }
 }
+
+#[cfg(feature = "rand")]
+pub mod compat {
+    pub struct QuadRand;
+
+    impl rand::RngCore for QuadRand {
+        fn next_u32(&mut self) -> u32 {
+            crate::gen_range(0, std::u32::MAX)
+        }
+        
+        fn next_u64(&mut self) -> u64 {
+            crate::gen_range(0, std::u64::MAX)
+        }
+
+        fn fill_bytes(&mut self, dest: &mut [u8]) {
+            for i in 0 .. dest.len() {
+                dest[i] = crate::gen_range(0, 255)
+            }
+        }
+
+        fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand::Error> {
+            Ok(self.fill_bytes(dest))
+        }
+    }
+}

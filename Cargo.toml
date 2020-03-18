@@ -1,7 +1,8 @@
 [package]
-name = "quad-prnd"
+name = "quad-rand"
 version = "0.1.0"
 authors = ["not-fl3 <not.fl3@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+rand = { version = "0.7", optional = true }
