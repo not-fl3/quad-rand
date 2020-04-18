@@ -8,7 +8,7 @@
 Compatible with wasm and any other rust target with std.
 
 Basic usage, no dependencies involved:
-```rand
+```rust
 use quad_rand as qrand;
 
 // seed random
@@ -28,7 +28,7 @@ assert!(x >= 64 && x < 128);
 
 Optional compatibility layer with `rand` crate:
 
-```rand
+```rust
 use quad_rand::compat::QuadRand;
 use rand::seq::SliceRandom;
 
