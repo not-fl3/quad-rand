@@ -1,8 +1,20 @@
 [package]
 name = "quad-rand"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["not-fl3 <not.fl3@gmail.com>"]
 edition = "2018"
+license = "MIT"
+homepage = "https://github.com/not-fl3/quad-rand"
+repository = "https://github.com/not-fl3/quad-rand"
+description = """
+Pseudo random implementation with std atomics.
+"""
+readme="README.md"
+
+[[example]]
+name = "compat"
+path = "examples/compat.rs"
+required-features = ["rand"]
 
 [dependencies]
 rand = { version = "0.7", optional = true }
