@@ -17,4 +17,4 @@ path = "examples/compat.rs"
 required-features = ["rand"]
 
 [dependencies]
-rand = { version = "0.7", optional = true }
+rand = { version = "0.8", optional = true }
