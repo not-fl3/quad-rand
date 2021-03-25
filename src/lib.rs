@@ -17,7 +17,7 @@ pub fn srand(seed: u64) {
     rand();
 }
 
-/// returns a pseudo-random number in the range of 0 to u32::MAX.
+/// Returns a pseudo-random number in the range of 0 to u32::MAX.
 pub fn rand() -> u32 {
     let oldstate: u64 = STATE.load(Ordering::Relaxed);
     STATE.store(
@@ -33,14 +33,6 @@ pub trait RandomRange {
     fn gen_range(low: Self, high: Self) -> Self;
 }
 
-impl RandomRange for u8 {
-    fn gen_range(low: Self, high: Self) -> Self {
-        let r = rand() as f32 / std::u32::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as u8
-    }
-}
-
 impl RandomRange for f32 {
     fn gen_range(low: Self, high: Self) -> Self {
         let r = rand() as f32 / std::u32::MAX as f32;
@@ -53,9 +45,65 @@ impl RandomRange for f64 {
         low + (high - low) * r as f64
     }
 }
-impl RandomRange for i32 {
-    fn gen_range(low: i32, high: i32) -> Self {
+
+impl RandomRange for u8 {
+    fn gen_range(low: Self, high: Self) -> Self {
         let r = rand() as f32 / std::u32::MAX as f32;
+        let r = low as f32 + (high as f32 - low as f32) * r;
+        r as u8
+    }
+}
+
+impl RandomRange for u16 {
+    fn gen_range(low: Self, high: Self) -> Self {
+        let r = rand() as f32 / std::u16::MAX as f32;
+        let r = low as f32 + (high as f32 - low as f32) * r;
+        r as u16
+    }
+}
+
+impl RandomRange for u32 {
+    fn gen_range(low: Self, high: Self) -> Self {
+        let r = rand() as f32 / std::u32::MAX as f32;
+        let r = low as f32 + (high as f32 - low as f32) * r;
+        r as u32
+    }
+}
+impl RandomRange for u64 {
+    fn gen_range(low: Self, high: Self) -> Self {
+        let r = rand() as f32 / std::u32::MAX as f32;
+        let r = low as f32 + (high as f32 - low as f32) * r;
+        r as u64
+    }
+}
+
+impl RandomRange for usize {
+    fn gen_range(low: usize, high: usize) -> Self {
+        let r = rand() as f32 / std::u32::MAX as f32;
+        let r = low as f32 + (high as f32 - low as f32) * r;
+        r as usize
+    }
+}
+
+impl RandomRange for i8 {
+    fn gen_range(low: Self, high: Self) -> Self {
+        let r = rand() as f32 / std::i8::MAX as f32;
+        let r = low as f32 + (high as f32 - low as f32) * r;
+        r as i8
+    }
+}
+
+impl RandomRange for i16 {
+    fn gen_range(low: Self, high: Self) -> Self {
+        let r = rand() as f32 / std::i16::MAX as f32;
+        let r = low as f32 + (high as f32 - low as f32) * r;
+        r as i16
+    }
+}
+
+impl RandomRange for i32 {
+    fn gen_range(low: Self, high: Self) -> Self {
+        let r = rand() as f32 / std::i32::MAX as f32;
         let r = low as f32 + (high as f32 - low as f32) * r;
         r as i32
     }
@@ -67,33 +115,12 @@ impl RandomRange for i64 {
         r as i64
     }
 }
-impl RandomRange for u32 {
-    fn gen_range(low: u32, high: u32) -> Self {
-        let r = rand() as f32 / std::u32::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as u32
-    }
-}
-impl RandomRange for u64 {
-    fn gen_range(low: u64, high: u64) -> Self {
-        let r = rand() as f32 / std::u32::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as u64
-    }
-}
-impl RandomRange for i16 {
-    fn gen_range(low: i16, high: i16) -> Self {
-        let r = rand() as f32 / std::u32::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as i16
-    }
-}
 
-impl RandomRange for usize {
-    fn gen_range(low: usize, high: usize) -> Self {
+impl RandomRange for isize {
+    fn gen_range(low: Self, high: Self) -> Self {
         let r = rand() as f32 / std::u32::MAX as f32;
         let r = low as f32 + (high as f32 - low as f32) * r;
-        r as usize
+        r as isize
     }
 }
 
@@ -164,13 +191,13 @@ pub mod compat {
         fn next_u32(&mut self) -> u32 {
             crate::gen_range(0, std::u32::MAX)
         }
-        
+
         fn next_u64(&mut self) -> u64 {
             crate::gen_range(0, std::u64::MAX)
         }
 
         fn fill_bytes(&mut self, dest: &mut [u8]) {
-            for i in 0 .. dest.len() {
+            for i in 0..dest.len() {
                 dest[i] = crate::gen_range(0, 255)
             }
         }
