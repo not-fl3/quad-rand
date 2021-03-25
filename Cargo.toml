@@ -11,14 +11,13 @@ Pseudo random implementation with std atomics.
 """
 readme="README.md"
 
+[dependencies]
+rand = {version = "0.8", optional = true}
+
 [[example]]
 name = "compat"
 path = "examples/compat.rs"
 required-features = ["rand"]
 
-[dependencies]
-[dependencies.rand]
-version = "0.8"
-optional = true
-default-features = false
-features = []
+[package.metadata.docs.rs]
+all-features = true
