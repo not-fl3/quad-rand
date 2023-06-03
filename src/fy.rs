@@ -8,7 +8,7 @@ pub struct FisherYates {
 }
 
 impl FisherYates {
-    pub fn shuffle<T>(&mut self, data: &mut Vec<T>) {
+    pub fn shuffle<T>(&mut self, data: &mut [T]) {
         for i in 1..data.len() {
             let j = self.gen_range(i);
             data.swap(i, j);

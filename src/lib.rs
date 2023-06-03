@@ -33,96 +33,21 @@ pub trait RandomRange {
     fn gen_range(low: Self, high: Self) -> Self;
 }
 
-impl RandomRange for f32 {
-    fn gen_range(low: Self, high: Self) -> Self {
-        let r = rand() as f32 / std::u32::MAX as f32;
-        low + (high - low) * r
-    }
+macro_rules! impl_random_range{
+  ($($ty:ty),*,)=>{
+    $(
+      impl RandomRange for $ty{
+        #[inline]
+        fn gen_range(low: Self, high: Self) -> Self {
+          let r = rand() as f64 / (u32::MAX as f64 + 1.0);
+          let r = low as f64 + (high as f64 - low as f64) * r;
+          r as Self
+        }
+      }
+    )*
+  }
 }
-impl RandomRange for f64 {
-    fn gen_range(low: Self, high: Self) -> Self {
-        let r = rand() as f32 / std::u32::MAX as f32;
-        low + (high - low) * r as f64
-    }
-}
-
-impl RandomRange for u8 {
-    fn gen_range(low: Self, high: Self) -> Self {
-        let r = rand() as f32 / std::u32::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as u8
-    }
-}
-
-impl RandomRange for u16 {
-    fn gen_range(low: Self, high: Self) -> Self {
-        let r = rand() as f32 / std::u16::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as u16
-    }
-}
-
-impl RandomRange for u32 {
-    fn gen_range(low: Self, high: Self) -> Self {
-        let r = rand() as f32 / std::u32::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as u32
-    }
-}
-impl RandomRange for u64 {
-    fn gen_range(low: Self, high: Self) -> Self {
-        let r = rand() as f32 / std::u32::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as u64
-    }
-}
-
-impl RandomRange for usize {
-    fn gen_range(low: usize, high: usize) -> Self {
-        let r = rand() as f32 / std::u32::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as usize
-    }
-}
-
-impl RandomRange for i8 {
-    fn gen_range(low: Self, high: Self) -> Self {
-        let r = rand() as f32 / std::i8::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as i8
-    }
-}
-
-impl RandomRange for i16 {
-    fn gen_range(low: Self, high: Self) -> Self {
-        let r = rand() as f32 / std::i16::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as i16
-    }
-}
-
-impl RandomRange for i32 {
-    fn gen_range(low: Self, high: Self) -> Self {
-        let r = rand() as f32 / std::i32::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as i32
-    }
-}
-impl RandomRange for i64 {
-    fn gen_range(low: Self, high: Self) -> Self {
-        let r = rand() as f32 / std::u32::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as i64
-    }
-}
-
-impl RandomRange for isize {
-    fn gen_range(low: Self, high: Self) -> Self {
-        let r = rand() as f32 / std::u32::MAX as f32;
-        let r = low as f32 + (high as f32 - low as f32) * r;
-        r as isize
-    }
-}
+impl_random_range!(f32, f64, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize,);
 
 pub fn gen_range<T>(low: T, high: T) -> T
 where
@@ -131,12 +56,12 @@ where
     T::gen_range(low, high)
 }
 
-pub struct VecChooseIter<'a, T> {
-    source: &'a Vec<T>,
+pub struct SliceChooseIter<'a, T> {
+    source: &'a [T],
     indices: std::vec::IntoIter<usize>,
 }
 
-impl<'a, T> Iterator for VecChooseIter<'a, T> {
+impl<'a, T> Iterator for SliceChooseIter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<&'a T> {
@@ -148,10 +73,10 @@ pub trait ChooseRandom<T> {
     fn shuffle(&mut self);
     fn choose(&self) -> Option<&T>;
     fn choose_mut(&mut self) -> Option<&mut T>;
-    fn choose_multiple(&self, _amount: usize) -> VecChooseIter<T>;
+    fn choose_multiple(&self, _amount: usize) -> SliceChooseIter<T>;
 }
 
-impl<T> ChooseRandom<T> for Vec<T> {
+impl<T> ChooseRandom<T> for [T] {
     fn shuffle(&mut self) {
         let mut fy = fy::FisherYates::default();
 
@@ -168,7 +93,7 @@ impl<T> ChooseRandom<T> for Vec<T> {
         self.get_mut(ix)
     }
 
-    fn choose_multiple(&self, amount: usize) -> VecChooseIter<T> {
+    fn choose_multiple(&self, amount: usize) -> SliceChooseIter<T> {
         let mut indices = (0..self.len())
             .enumerate()
             .map(|(i, _)| i)
@@ -176,7 +101,7 @@ impl<T> ChooseRandom<T> for Vec<T> {
 
         indices.resize(amount, 0);
 
-        VecChooseIter {
+        SliceChooseIter {
             source: self,
             indices: indices.into_iter(),
         }
