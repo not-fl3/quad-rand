@@ -1,4 +1,8 @@
-use std::sync::atomic::{AtomicU64, Ordering};
+#![no_std]
+extern crate alloc;
+
+use alloc::vec::Vec;
+use core::sync::atomic::{AtomicU64, Ordering};
 
 mod fy;
 
@@ -58,7 +62,7 @@ where
 
 pub struct SliceChooseIter<'a, T> {
     source: &'a [T],
-    indices: std::vec::IntoIter<usize>,
+    indices: alloc::vec::IntoIter<usize>,
 }
 
 impl<'a, T> Iterator for SliceChooseIter<'a, T> {
@@ -114,11 +118,11 @@ pub mod compat {
 
     impl rand::RngCore for QuadRand {
         fn next_u32(&mut self) -> u32 {
-            crate::gen_range(0, std::u32::MAX)
+            crate::gen_range(0, u32::MAX)
         }
 
         fn next_u64(&mut self) -> u64 {
-            crate::gen_range(0, std::u64::MAX)
+            crate::gen_range(0, u64::MAX)
         }
 
         fn fill_bytes(&mut self, dest: &mut [u8]) {
