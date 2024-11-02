@@ -5,7 +5,7 @@
 
 `quad-rand` implements pseudo-random generator http://www.pcg-random.org/download.html based on rust atomics. 
 
-Compatible with wasm and any other rust target with std.
+Compatible with wasm and also no-std compatible.
 
 Basic usage, no dependencies involved:
 ```rust
