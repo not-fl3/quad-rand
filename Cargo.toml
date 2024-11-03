@@ -19,5 +19,10 @@ name = "compat"
 path = "examples/compat.rs"
 required-features = ["rand"]
 
+[[example]]
+name = "compat-with-state"
+path = "examples/compat_with_state.rs"
+required-features = ["rand"]
+
 [package.metadata.docs.rs]
 all-features = true
