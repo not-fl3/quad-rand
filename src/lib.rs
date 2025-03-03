@@ -6,37 +6,36 @@ use core::sync::atomic::{AtomicU64, Ordering};
 
 mod fy;
 
-const DEFAULT_INC: u64 = 1442695040888963407;
-const MULTIPLIER: u64 = 6364136223846793005;
+const INCREMENT: u64 = 0x9e37_79b9_7f4a_7c15;
 
 pub struct RandGenerator {
     state: AtomicU64,
 }
 
 impl RandGenerator {
+    // We pre-emptively add `INCREMENT` when constructing or
+    // setting the state because the `fetch_add` in `Self::rand`
+    // returns the *previous* state.
+    #[inline]
     pub const fn new() -> Self {
         Self {
-            state: AtomicU64::new(0),
+            state: AtomicU64::new(INCREMENT),
         }
     }
+
+    #[inline]
     pub fn srand(&self, seed: u64) {
-        self.state.store(0, Ordering::Relaxed);
-        self.rand();
-        let oldstate = self.state.load(Ordering::Relaxed);
         self.state
-            .store(oldstate.wrapping_add(seed), Ordering::Relaxed);
-        self.rand();
+            .store(seed.wrapping_add(INCREMENT), Ordering::Release);
     }
+
     pub fn rand(&self) -> u32 {
-        let oldstate: u64 = self.state.load(Ordering::Relaxed);
-        self.state.store(
-            oldstate.wrapping_mul(MULTIPLIER).wrapping_add(DEFAULT_INC),
-            Ordering::Relaxed,
-        );
-        let xorshifted: u32 = (((oldstate >> 18) ^ oldstate) >> 27) as u32;
-        let rot: u32 = (oldstate >> 59) as u32;
-        xorshifted.rotate_right(rot)
+        let mut z = self.state.fetch_add(INCREMENT, Ordering::AcqRel);
+        z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
+        z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
+        (z as u32) ^ ((z >> 32) as u32)
     }
+
     #[inline]
     pub fn gen_range<T>(&self, low: T, high: T) -> T
     where
