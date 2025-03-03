@@ -3,7 +3,7 @@
 [![Crates.io version](https://img.shields.io/crates/v/quad-rand.svg)](https://crates.io/crates/quad-rand)
 [![Documentation on docs.rs](https://docs.rs/quad-rand/badge.svg)](https://docs.rs/quad-rand)
 
-`quad-rand` implements pseudo-random generator http://www.pcg-random.org/download.html based on rust atomics. 
+`quad-rand` implements the [SplitMix](https://doi.org/10.1145/2660193.2660195) pseudo-random number generator in a thread-safe manner.
 
 Compatible with wasm and also no-std compatible.
 
