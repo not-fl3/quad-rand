@@ -60,6 +60,22 @@ pub fn rand() -> u32 {
     GLOBAL_STATE.rand()
 }
 
+/// Seeds the pseudo-random number generator used by rand()
+/// with the current time in nanoseconds.
+#[cfg(feature = "std")]
+pub fn seed_current_time() {
+    extern crate std;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    srand(
+        (SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("time should be after UNIX_EPOCH")
+            .as_nanos()
+            % (u64::MAX as u128)) as u64,
+    );
+}
+
 pub trait RandomRange {
     fn gen_range(low: Self, high: Self) -> Self;
     fn gen_range_with_state(state: &RandGenerator, low: Self, high: Self) -> Self;
