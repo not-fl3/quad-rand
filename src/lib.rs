@@ -2,6 +2,7 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
+use core::ops::{Bound, RangeBounds};
 use core::sync::atomic::{AtomicU64, Ordering};
 
 mod fy;
@@ -37,11 +38,11 @@ impl RandGenerator {
     }
 
     #[inline]
-    pub fn gen_range<T>(&self, low: T, high: T) -> T
+    pub fn gen_range<T>(&self, range: impl RangeBounds<T>) -> T
     where
         T: RandomRange,
     {
-        T::gen_range_with_state(self, low, high)
+        T::gen_range_with_state(self, range)
     }
 }
 
@@ -61,8 +62,8 @@ pub fn rand() -> u32 {
 }
 
 pub trait RandomRange {
-    fn gen_range(low: Self, high: Self) -> Self;
-    fn gen_range_with_state(state: &RandGenerator, low: Self, high: Self) -> Self;
+    fn gen_range(range: impl RangeBounds<Self>) -> Self;
+    fn gen_range_with_state(gen: &RandGenerator, range: impl RangeBounds<Self>) -> Self;
 }
 
 macro_rules! impl_random_range{
@@ -70,27 +71,40 @@ macro_rules! impl_random_range{
         $(
             impl RandomRange for $ty{
                 #[inline]
-                fn gen_range(low: Self, high: Self) -> Self{
-                    Self::gen_range_with_state(&GLOBAL_STATE, low, high)
+                fn gen_range(range: impl RangeBounds<Self>) -> Self {
+                    Self::gen_range_with_state(&GLOBAL_STATE, range)
                 }
                 #[inline]
-                fn gen_range_with_state(gen: &RandGenerator, low: Self, high: Self) -> Self {
+                fn gen_range_with_state(gen: &RandGenerator, range: impl RangeBounds<Self>) -> Self {
+                    let low = match range.start_bound() {
+                        Bound::Included(v) => *v,
+                        // unreachable with builtin range types, but other RangeBounds impls are possible too
+                        Bound::Excluded(v) => *v + 1 as Self,
+                        Bound::Unbounded => Self::MIN,
+                    };
+                    let high = match range.end_bound() {
+                        Bound::Included(v) => *v,
+                        Bound::Excluded(v) => *v - 1 as Self,
+                        Bound::Unbounded => Self::MAX,
+                    };
+
                     let r = gen.rand() as f64 / (u32::MAX as f64 + 1.0);
-                    let r = low as f64 + (high as f64 - low as f64) * r;
+                    let r = low as f64 + (high as f64 + 1.0 - low as f64) * r;
                     r as Self
                 }
             }
         )*
     }
 }
+
 impl_random_range!(f32, f64, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize,);
 
 #[inline]
-pub fn gen_range<T>(low: T, high: T) -> T
+pub fn gen_range<T>(range: impl RangeBounds<T>) -> T
 where
     T: RandomRange,
 {
-    GLOBAL_STATE.gen_range(low, high)
+    GLOBAL_STATE.gen_range(range)
 }
 
 pub struct SliceChooseIter<'a, T> {
@@ -145,13 +159,13 @@ impl<T> ChooseRandom<T> for [T] {
 
     #[inline]
     fn choose_with_state(&self, state: &RandGenerator) -> Option<&T> {
-        let ix = state.gen_range(0, self.len());
+        let ix = state.gen_range(0..self.len());
         self.get(ix)
     }
 
     #[inline]
     fn choose_mut_with_state(&mut self, state: &RandGenerator) -> Option<&mut T> {
-        let ix = state.gen_range(0, self.len());
+        let ix = state.gen_range(0..self.len());
         self.get_mut(ix)
     }
 
@@ -183,18 +197,18 @@ pub mod compat {
     impl<'a> rand::RngCore for QuadRandWithState<'a> {
         #[inline]
         fn next_u32(&mut self) -> u32 {
-            self.0.gen_range(0, u32::MAX)
+            self.0.gen_range(0..=u32::MAX)
         }
 
         #[inline]
         fn next_u64(&mut self) -> u64 {
-            self.0.gen_range(0, u64::MAX)
+            self.0.gen_range(0..=u64::MAX)
         }
 
         #[inline]
         fn fill_bytes(&mut self, dest: &mut [u8]) {
             for i in 0..dest.len() {
-                dest[i] = self.0.gen_range(0, 255)
+                dest[i] = self.0.gen_range(0..=255)
             }
         }
 
