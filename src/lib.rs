@@ -121,7 +121,7 @@ pub trait ChooseRandom<T> {
         self.choose_mut_with_state(&GLOBAL_STATE)
     }
     #[inline]
-    fn choose_multiple(&self, amount: usize) -> SliceChooseIter<T> {
+    fn choose_multiple(&self, amount: usize) -> SliceChooseIter<'_, T> {
         self.choose_multiple_with_state(&GLOBAL_STATE, amount)
     }
 
@@ -132,7 +132,7 @@ pub trait ChooseRandom<T> {
         &self,
         state: &RandGenerator,
         _amount: usize,
-    ) -> SliceChooseIter<T>;
+    ) -> SliceChooseIter<'_, T>;
 }
 
 impl<T> ChooseRandom<T> for [T] {
@@ -160,7 +160,7 @@ impl<T> ChooseRandom<T> for [T] {
         &self,
         state: &RandGenerator,
         amount: usize,
-    ) -> SliceChooseIter<T> {
+    ) -> SliceChooseIter<'_, T> {
         let mut indices = (0..self.len())
             .enumerate()
             .map(|(i, _)| i)
