@@ -14,6 +14,9 @@ readme = "README.md"
 [dependencies]
 rand = { version = "0.8", optional = true }
 
+[target.'cfg(not(target_has_atomic = "64"))'.dependencies]
+portable-atomic = "1"
+
 [[example]]
 name = "compat"
 path = "examples/compat.rs"
