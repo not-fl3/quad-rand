@@ -26,7 +26,7 @@ impl FisherYates {
         let byte_count = (bit_width - 1) / 8 + 1;
         loop {
             for i in 0..byte_count {
-                self.buffer[i] = state.gen_range(0, 255);
+                self.buffer[i] = state.gen_range(0..=255);
             }
             let result = usize::from_le_bytes(self.buffer);
             let result = result & ((1 << bit_width) - 1);
