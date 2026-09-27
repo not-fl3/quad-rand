@@ -13,7 +13,7 @@ pub struct FisherYates {
 impl FisherYates {
     pub fn shuffle_with_state<T>(&mut self, state: &RandGenerator, data: &mut [T]) {
         for i in 1..data.len() {
-            let j = self.gen_range(state, i);
+            let j = self.gen_range(state, i + 1);
             data.swap(i, j);
         }
     }
